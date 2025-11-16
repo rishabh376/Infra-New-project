@@ -1,6 +1,14 @@
-resource "azurerm_resource_group" "MynewinfraRG" {
-  name     = var.infra_rg_name     # yeh resource group ka name hai jo azure mein create hoga
-  location = var.infra_rg_location # yeh is resource group ka region batata hai
+resource "azurerm_resource_group" "MynewinfraRG" { # Resource Group create karne ke liye resource block. Resource Group ek logical container hota hai jisme hum apne Azure resources ko organize karte hain.
+  name     = var.infra_rg_name                     # yeh resource group ka name hai jo azure mein create hoga
+  location = var.infra_rg_location                 # yeh is resource group ka region batata hai
+}
+
+resource "azurerm_storage_account" "Infrastorage_account" { # Storage Account create karne ke liye resource block. Storage Account ek logical container hota hai jisme hum blobs, files, queues, tables etc. store kar sakte hain.
+  name                     = var.infra_storage_account      # storage account ka unique name jo globally unique hona chahiye
+  resource_group_name      = azurerm_resource_group.MynewinfraRG.name
+  location                 = azurerm_resource_group.MynewinfraRG.location
+  account_tier             = var.account_tier    # storage account ka performance tier (Standard ya Premium). Standard cost-effective hota hai aur general purpose ke liye use hota hai, jabki Premium high-performance workloads ke liye use hota hai.
+  account_replication_type = var.redundancy_type # replication type jo data redundancy provide karta hai. LRS (Locally Redundant Storage) data ko ek hi region mein replicate karta hai, GRS (Geo-Redundant Storage) data ko do alag regions mein replicate karta hai for disaster recovery.
 }
 
 resource "azurerm_virtual_network" "InfraVNet" { # Virtual Network create karne ke liye resource block. Virtual Network ek logical isolation hota hai jahan hum apne resources ko network provide karte hain.
@@ -10,6 +18,7 @@ resource "azurerm_virtual_network" "InfraVNet" { # Virtual Network create karne 
   address_space       = var.infra_vnet_address_space
 
 }
+
 
 resource "azurerm_subnet" "Infrakasubnet" { # Subnet create karne ke liye resource block. Subnet virtual network ka ek logical segmented part hota hai jo IP address range ko divide karta hai.
   name                = var.infra_subnet_name
@@ -78,3 +87,38 @@ resource "azurerm_public_ip" "InfraPIP" {  # Public IP address create karne ke l
 # Note: Agar hum "Dynamic" choose karte hain to IP address time ke saath change ho sakta hai, jo ki kuch scenarios mein problematic ho sakta hai, jaise ki jab hum kisi service ko internet par host kar rahe hote hain aur hume chahiye ki wo hamesha same IP address par accessible rahe.
 # Note: Static IP address choose karne ka yeh bhi fayda hai ki hum apne DNS records ko easily manage kar sakte hain, kyunki hume pata hota hai ki humara resource kis IP address par accessible hoga.
 
+resource "azurerm_virtual_machine" "Infra_VM" { # Virtual Machine create karne ke liye resource block. Virtual Machine ek compute resource hota hai jahan hum apne applications aur services ko run karte hain.
+  name                             = var.infra_vm_name
+  location                         = azurerm_resource_group.MynewinfraRG.location
+  resource_group_name              = azurerm_resource_group.MynewinfraRG.name
+  network_interface_ids            = [azurerm_network_interface.InfraNIC.id]
+  vm_size                          = "Standard_B1s"
+  delete_os_disk_on_termination    = true # Yeh ensure karta hai ki jab virtual machine delete ki jaye, to uska associated OS disk bhi automatically delete ho jaye. Isse unnecessary storage costs bachti hain aur resource cleanup mein madad milti hai.
+  delete_data_disks_on_termination = true # Yeh ensure karta hai ki jab virtual machine delete ki jaye, to uske associated data disks bhi automatically delete ho jayein.
+
+  storage_image_reference {# Virtual machine ke liye OS image specify karne ke liye block. Yahan hum Ubuntu Server 22.04 LTS image use kar rahe hain.
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "22.04-LTS"
+    version   = "latest"
+  }
+
+  storage_os_disk {# OS disk ke liye storage configuration define karne ke liye block.
+    name              = "infraosdisk"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+
+  os_profile {# Virtual machine ke liye OS profile define karne ke liye block. Isme hum specify karte hain ki virtual machine ka computer name kya hoga aur admin credentials kya honge.
+    computer_name  = "infravm"
+    admin_username = var.infra_vm_admin_username
+    admin_password = var.infra_vm_admin_password
+  }
+
+  boot_diagnostics {# Virtual machine ke boot diagnostics configuration define karne ke liye block. Isme hum specify karte hain ki boot diagnostics enable karna hai ya nahi aur uske liye storage URI kya hoga.
+    enabled     = true
+    storage_uri = azurerm_storage_account.Infrastorage_account.primary_blob_endpoint
+  }
+
+}

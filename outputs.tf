@@ -73,3 +73,29 @@ output "nicnsgassociation" {
   description = "Yeh humare NIC aur NSG ke beech association batayga."
   value       = azurerm_network_interface_security_group_association.InfraNICNSGAssociation.id
 }
+
+output "strorageaccountname" {
+  description = "Yeh humare storage account ka naam hai"
+  value       = azurerm_storage_account.Infrastorage_account.name
+}
+
+output "vmname" {
+  description = "Yeh humare virtual machine ka naam batayga."
+  value       = azurerm_virtual_machine.Infra_VM.name
+}
+
+output "vmprivateip" {
+  description = "Yeh humare virtual machine ka private IP address batayga."
+  value       = azurerm_network_interface.InfraNIC.ip_configuration[0].private_ip_address
+}
+output "vmpublicip" {
+  description = "Yeh humare virtual machine ka public IP address batayga."
+  value       = azurerm_network_interface.InfraNIC.ip_configuration[0].public_ip_address_id
+}
+
+
+
+output "bootdiagnosticreport" {# Virtual machine ke boot diagnostics storage URI ko retrieve karne ke liye output.
+  description = "Yeh humare virtual machine ke boot diagnostics storage URI batayga."
+  value = azurerm_virtual_machine.Infra_VM.boot_diagnostics[0].storage_uri
+}

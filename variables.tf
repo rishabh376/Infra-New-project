@@ -84,3 +84,33 @@ variable "infra_PIP_name" {
   description = "Yeh wo public IP address ka name hai jo hum ek resource ke liye create karenge."
   type        = string # kyunki public IP address ka name bhi ek string hota hai
 }
+
+variable "infra_storage_account" {
+  description = "Yeh wo storage account ka name hai jo hum create karenge."
+  type        = string # kyunki storage account ka name bhi ek string hota hai
+}
+
+variable "account_tier" {
+  description = "Yeh wo account type jo performance tier define karta hai. Isme do tarah ke options hote hain: Standard aur Premium."
+  type        = string # kyunki account tier mein hum string values use karte hain jaise "Standard" ya "Premium"
+}
+variable "redundancy_type" {
+  description = "Yeh wo replication or backup strategy hai jo data redundancy provide karta hai. Isme 4 tarah ke options hote hain: LRS (Locally Redundant Storage), GRS (Geo-Redundant Storage), ZRS (Zone-Redundant Storage), aur GZRS (Geo Zone Redundant Storage)."
+  type        = string # kyunki redundancy type mein hum string values use karte hain jaise "LRS", "GRS", "ZRS", ya "GZRS"
+}
+
+variable "infra_vm_name" {
+  description = "Yeh hai virtual machine ka naam jo hum create karenge."
+  type        = string # kyunki virtual machine ka naam bhi ek string hota hai
+}
+
+variable "infra_vm_admin_username" {
+  description = "Yeh hai virtual machine ka administrator username."
+  type        = string # kyunki username bhi ek string hota hai
+}
+
+variable "infra_vm_admin_password" {
+  description = "Yeh hai virtual machine ka administrator password."
+  type        = string # kyunki password bhi ek string hota hai
+  sensitive   = true   # taaki yeh value terraform output mein na dikhe
+}
