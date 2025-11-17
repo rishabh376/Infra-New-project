@@ -71,6 +71,19 @@ resource "azurerm_network_interface" "InfraNIC" { # Network Interface Card (NIC)
   }
 }
 
+resource "azurerm_network_interface" "InfraNIC_Backend" {
+  name                = var.infra_backend_NIC_name
+  location            = azurerm_resource_group.MynewinfraRG.location
+  resource_group_name = azurerm_resource_group.MynewinfraRG.name
+
+  ip_configuration {
+    name                          = "backendkaconnection"
+    subnet_id                     = azurerm_subnet.Infrakasubnet.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.InfraPIP_Backend.id
+  }
+}
+
 resource "azurerm_network_interface_security_group_association" "InfraNICNSGAssociation" {
   network_interface_id      = azurerm_network_interface.InfraNIC.id                     # yeh NIC ka ID hai jise hum NSG se associate karna chahte hain. Reason yeh hai ki hum chahte hai ki NSG ke rules NIC ko traffic filter karne mein help karein.
   network_security_group_id = azurerm_network_security_group.Infranetkasecurityguard.id # yeh NSG ka ID hai jise hum NIC se associate karna chahte hain. Reason yeh hai ki hum chahte hain ki yeh NIC us NSG ke rules ko follow kare jo humne define kiya hai.
@@ -87,6 +100,13 @@ resource "azurerm_public_ip" "InfraPIP" {  # Public IP address create karne ke l
 # Note: Agar hum "Dynamic" choose karte hain to IP address time ke saath change ho sakta hai, jo ki kuch scenarios mein problematic ho sakta hai, jaise ki jab hum kisi service ko internet par host kar rahe hote hain aur hume chahiye ki wo hamesha same IP address par accessible rahe.
 # Note: Static IP address choose karne ka yeh bhi fayda hai ki hum apne DNS records ko easily manage kar sakte hain, kyunki hume pata hota hai ki humara resource kis IP address par accessible hoga.
 
+resource "azurerm_public_ip" "InfraPIP_Backend" {
+  name                = var.infra_PIP_backend_name
+  location            = azurerm_resource_group.MynewinfraRG.location
+  resource_group_name = azurerm_resource_group.MynewinfraRG.name
+  allocation_method   = "Static"
+}
+
 resource "azurerm_virtual_machine" "Infra_VM" { # Virtual Machine create karne ke liye resource block. Virtual Machine ek compute resource hota hai jahan hum apne applications aur services ko run karte hain.
   name                             = var.infra_vm_name
   location                         = azurerm_resource_group.MynewinfraRG.location
@@ -96,27 +116,63 @@ resource "azurerm_virtual_machine" "Infra_VM" { # Virtual Machine create karne k
   delete_os_disk_on_termination    = true # Yeh ensure karta hai ki jab virtual machine delete ki jaye, to uska associated OS disk bhi automatically delete ho jaye. Isse unnecessary storage costs bachti hain aur resource cleanup mein madad milti hai.
   delete_data_disks_on_termination = true # Yeh ensure karta hai ki jab virtual machine delete ki jaye, to uske associated data disks bhi automatically delete ho jayein.
 
-  storage_image_reference {# Virtual machine ke liye OS image specify karne ke liye block. Yahan hum Ubuntu Server 22.04 LTS image use kar rahe hain.
+  storage_image_reference { # Virtual machine ke liye OS image specify karne ke liye block. Yahan hum Ubuntu Server 22.04 LTS image use kar rahe hain.
     publisher = "Canonical"
     offer     = "UbuntuServer"
     sku       = "22.04-LTS"
     version   = "latest"
   }
 
-  storage_os_disk {# OS disk ke liye storage configuration define karne ke liye block.
+  storage_os_disk { # OS disk ke liye storage configuration define karne ke liye block.
     name              = "infraosdisk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Standard_LRS"
   }
 
-  os_profile {# Virtual machine ke liye OS profile define karne ke liye block. Isme hum specify karte hain ki virtual machine ka computer name kya hoga aur admin credentials kya honge.
+  os_profile { # Virtual machine ke liye OS profile define karne ke liye block. Isme hum specify karte hain ki virtual machine ka computer name kya hoga aur admin credentials kya honge.
     computer_name  = "infravm"
     admin_username = var.infra_vm_admin_username
     admin_password = var.infra_vm_admin_password
   }
 
-  boot_diagnostics {# Virtual machine ke boot diagnostics configuration define karne ke liye block. Isme hum specify karte hain ki boot diagnostics enable karna hai ya nahi aur uske liye storage URI kya hoga.
+  boot_diagnostics { # Virtual machine ke boot diagnostics configuration define karne ke liye block. Isme hum specify karte hain ki boot diagnostics enable karna hai ya nahi aur uske liye storage URI kya hoga.
+    enabled     = true
+    storage_uri = azurerm_storage_account.Infrastorage_account.primary_blob_endpoint
+  }
+
+}
+
+resource "azurerm_virtual_machine" "Infra_VM_Backend" {
+  name                = var.infra_backend_vm_name
+  location            = azurerm_resource_group.MynewinfraRG.location
+  resource_group_name = azurerm_resource_group.MynewinfraRG.name
+  network_interface_ids = [azurerm_network_interface.InfraNIC_Backend.id]
+  vm_size              = "Standard_B1s"
+  delete_os_disk_on_termination    = true
+  delete_data_disks_on_termination = true
+
+  storage_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "22.04-LTS"
+    version   = "latest"
+  }
+
+  storage_os_disk {
+    name              = "infrabackendosdisk"
+    caching           = "ReadWrite"
+    create_option     = "FromImage"
+    managed_disk_type = "Standard_LRS"
+  }
+
+  os_profile {
+    computer_name  = "infrabackendvm"
+    admin_username = var.infra_vm_backend_admin_username
+    admin_password = var.infra_vm_backend_admin_password
+  }
+
+  boot_diagnostics {
     enabled     = true
     storage_uri = azurerm_storage_account.Infrastorage_account.primary_blob_endpoint
   }

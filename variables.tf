@@ -114,3 +114,30 @@ variable "infra_vm_admin_password" {
   type        = string # kyunki password bhi ek string hota hai
   sensitive   = true   # taaki yeh value terraform output mein na dikhe
 }
+
+variable "infra_backend_vm_name" {
+  description = "Yeh hai backend virtual machine ka naam jo hum create karenge."
+  type        = string # kyunki virtual machine ka naam bhi ek string hota hai
+}
+
+variable "infra_backend_NIC_name" {
+  description = "Yeh hai backend virtual machine ka network interface card (NIC) ka naam."
+  type        = string # kyunki NIC ka naam bhi ek string hota hai
+}
+
+variable "infra_PIP_backend_name" {
+  description = "Yeh wo public IP address ka name hai jo hum backend virtual machine ke liye create karenge."
+  type        = string # kyunki public IP address ka name bhi ek string hota hai
+}
+
+variable "infra_vm_backend_admin_username" {
+  description = "Yeh hai backend virtual machine ka administrator username."
+  type        = string # kyunki username bhi ek string hota hai
+  
+}
+
+variable "infra_vm_backend_admin_password" {
+  description = "Yeh hai backend virtual machine ka administrator password."
+  type        = string # kyunki password bhi ek string hota hai
+  sensitive   = true   # taaki yeh value terraform output mein na dikhe
+}
