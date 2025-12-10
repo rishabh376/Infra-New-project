@@ -178,3 +178,5 @@ resource "azurerm_virtual_machine" "Infra_VM_Backend" {
   }
 
 }
+
+
