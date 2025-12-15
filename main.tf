@@ -47,6 +47,7 @@ resource "azurerm_network_security_group" "Infranetkasecurityguard" { # Network 
   }
 }
 
+
 # Note: source port aur destination port range dono hi string type ke hote hain kyunki hume specific ports ya port ranges define karni hoti hain jaise "80", "443", "1000-2000" etc. isiliye unhe string ke roop mein treat kiya jata hai.
 # Note: source address prefix aur source port range mein main difference yeh hai ki source address prefix IP addresses ko define karta hai jahan se traffic aa raha hai, jabki source port range un ports ko define karta hai jahan se traffic originate ho raha hai. Dono alag-alag cheezein hain aur dono ko alag-alag specify karna zaroori hota hai.
 # Note: destination address prefix aur destination port range mein bhi yehhi difference hai. Destination address prefix IP addresses ko define karta hai jahan traffic ja raha hai, jabki destination port range un ports ko define karta hai jahan traffic land ho raha hai.
