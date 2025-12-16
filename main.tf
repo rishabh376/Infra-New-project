@@ -180,4 +180,9 @@ resource "azurerm_virtual_machine" "Infra_VM_Backend" {
 
 }
 
+resource "azurerm_network_interface_security_group_association" "InfraBackendNICNSGAssociation" {
+  network_interface_id      = azurerm_network_interface.InfraNIC_Backend.id
+  network_security_group_id = azurerm_network_security_group.Infranetkasecurityguard.id
+}
+
 

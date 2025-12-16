@@ -56,19 +56,7 @@ output "publicipaddress" {
   description = "Yeh humare public IP address batayga."
   value       = azurerm_public_ip.InfraPIP.ip_address
 }
-output "publicipallocationmethod" {
-  description = "Yeh humare public IP address ka allocation method batayga."
-  value       = azurerm_public_ip.InfraPIP.allocation_method
-}
-output "publicipsku" {
-  description = "Yeh humare public IP address ka SKU batayga."
-  value       = azurerm_public_ip.InfraPIP.sku
-}
 
-output "publicipid" {
-  description = "Yeh humare public IP address ka ID batayga."
-  value       = azurerm_public_ip.InfraPIP.id
-}
 output "nicnsgassociation" {
   description = "Yeh humare NIC aur NSG ke beech association batayga."
   value       = azurerm_network_interface_security_group_association.InfraNICNSGAssociation.id
@@ -88,11 +76,6 @@ output "vmprivateip" {
   description = "Yeh humare virtual machine ka private IP address batayga."
   value       = azurerm_network_interface.InfraNIC.ip_configuration[0].private_ip_address
 }
-output "vmpublicip" {
-  description = "Yeh humare virtual machine ka public IP address batayga."
-  value       = azurerm_network_interface.InfraNIC.ip_configuration[0].public_ip_address_id
-}
-
 
 
 output "bootdiagnosticreport" {# Virtual machine ke boot diagnostics storage URI ko retrieve karne ke liye output.
