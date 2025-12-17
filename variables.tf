@@ -141,3 +141,4 @@ variable "infra_vm_backend_admin_password" {
   type        = string # kyunki password bhi ek string hota hai
   sensitive   = true   # taaki yeh value terraform output mein na dikhe
 }
+
